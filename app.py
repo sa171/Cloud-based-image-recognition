@@ -1,3 +1,5 @@
+import json
+
 from flask import Flask, jsonify, request
 import logging
 import boto3
@@ -18,19 +20,20 @@ def upload():
     #     return jsonify({'message': 'Bad Request'}), 400
     try:
         file = request.files['myfile']
-        sqs = boto3.resource('sqs')
-        queue = sqs.get_queue_by_name(QueueName='request_queue')
+        sqsClient = boto3.client('sqs')
+        # queue = sqsClient.get_queue_url(QueueName='request_queue')
+        queueUrl = "https://sqs.us-east-1.amazonaws.com/924531911717/request_queue"
         # if len(queue_list) == 0:
         #     sqs.create_queue(QueueName="request_queue")
-        app.logger.info("Received SQS queue url:",queue.url)
-        queueUrl = queue.url
+        # app.logger.info("Received SQS queue url:",queue['QueueUrl'])
+        # queueUrl = queue['QueueUrl']
         message = {
             'Id':str(uuid.uuid4()),
-            'image':base64.b64encode(file.read())
+            'image':base64.b64encode(file.read()).decode("utf-8")
         }
-        response = sqs.send_message(
+        response = sqsClient.send_message(
             QueueUrl= queueUrl,
-            MessageBody=message
+            MessageBody= json.dumps(message)
         )
         app.logger.info(response)
         app.logger.info("Image sent to SQS successfully.")
