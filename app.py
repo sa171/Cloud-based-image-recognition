@@ -20,15 +20,15 @@ def upload():
     #     return jsonify({'message': 'Bad Request'}), 400
     try:
         file = request.files['myfile']
-        sqsClient = boto3.client('sqs')
+        sqsClient = boto3.client('sqs',region_name="us-east-1")
         # queue = sqsClient.get_queue_url(QueueName='request_queue')
-        queueUrl = "https://sqs.us-east-1.amazonaws.com/924531911717/request_queue"
+        queueUrl = "https://sqs.us-east-1.amazonaws.com/874290406143/request_queue"
         # if len(queue_list) == 0:
         #     sqs.create_queue(QueueName="request_queue")
         # app.logger.info("Received SQS queue url:",queue['QueueUrl'])
         # queueUrl = queue['QueueUrl']
         message = {
-            'Id':str(uuid.uuid4()),
+            'id':str(uuid.uuid4()),
             'image':base64.b64encode(file.read()).decode("utf-8")
         }
         response = sqsClient.send_message(
@@ -52,4 +52,4 @@ def upload():
         return jsonify({'message':"Some issue with the server"}),500
     
 if __name__ == '__main__':
-    app.run(threaded=True,host="127.0.0.1",port=5000,debug=True)
+    app.run(threaded=True,host="0.0.0.0",port=5000,debug=True)
