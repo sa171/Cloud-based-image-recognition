@@ -63,6 +63,10 @@ while True:
             QueueUrl=queue_url,
             ReceiptHandle=receipt_handle
         )
+        # TODO:Upload Image to S3 input bucket - Use id by message_body['id'] and img
+
+        # TODO: Upload result to output bucket - Use result and id by message_body['id']
+
     else:
         logging.info("No messages in queue")
 #img = Image.open(urlopen(url))
