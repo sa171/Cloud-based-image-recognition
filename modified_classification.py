@@ -56,7 +56,7 @@ while True:
         # save_name = f"({img_name}, {result})"
         save_name = f"{img_name},{result}"
         print(f"{save_name}")
-
+        logging.info("Classification result of {} is {}".format(message_body['id'],result))
         # Delete the message from the queue
         receipt_handle = message['ReceiptHandle']
         sqs.delete_message(
