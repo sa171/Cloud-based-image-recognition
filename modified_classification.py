@@ -31,11 +31,11 @@ while True:
         MaxNumberOfMessages=1,
         WaitTimeSeconds=20
     )
-    if 'Messages' in response:
-        logger.debug('Received message from SQS',message)
+    if len(response['Messages']) != 0:
         message = response['Messages'][0]
-        message_body = message['Body']
-        print(f"Received message: {message['Body']}")
+        logger.debug('Received message from SQS', message)
+        message_body = json.loads(message['Body'])
+        # print(f"Received message: {message['Body']}")
         image_data = message_body['image']
         logger.debug(f"Message Id: {message_body['id']}")
         # Decode the base64-encoded image data
