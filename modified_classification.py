@@ -1,5 +1,6 @@
 import base64
 from io import BytesIO
+import logging
 
 import torch
 import torchvision
@@ -16,21 +17,27 @@ import time
 import boto3
 
 sqs = boto3.client('sqs')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+file_handler = logging.FileHandler('classification.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/request_queue'
 
 while True:
-    queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/request_queue'
-
     response = sqs.receive_message(
         QueueUrl=queue_url,
         MaxNumberOfMessages=1,
         WaitTimeSeconds=20
     )
     if 'Messages' in response:
+        logger.debug('Received message from SQS',message)
         message = response['Messages'][0]
         message_body = message['Body']
         print(f"Received message: {message['Body']}")
         image_data = message_body['image']
-
+        logger.debug(f"Message Id: {message_body['id']}")
         # Decode the base64-encoded image data
         decoded_data = base64.b64decode(image_data)
 
@@ -58,6 +65,6 @@ while True:
             ReceiptHandle=receipt_handle
         )
     else:
-        print("No messages in queue")
+        logger.info("No messages in queue")
 #img = Image.open(urlopen(url))
 
