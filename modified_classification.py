@@ -17,12 +17,11 @@ import time
 import boto3
 
 sqs = boto3.client('sqs')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+
 file_handler = logging.FileHandler('classification.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
 file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
+logging.basicConfig(filename='classification.log', level=logging.DEBUG)
 queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/request_queue'
 
 while True:
@@ -31,13 +30,13 @@ while True:
         MaxNumberOfMessages=1,
         WaitTimeSeconds=20
     )
-    if len(response['Messages']) != 0:
+    if 'Messages' in response:
         message = response['Messages'][0]
-        logger.debug('Received message from SQS', message)
+        logging.debug('Received message from SQS', message)
         message_body = json.loads(message['Body'])
-        # print(f"Received message: {message['Body']}")
         image_data = message_body['image']
-        logger.debug(f"Message Id: {message_body['id']}")
+        # Logging ID for tracing
+        logging.debug(f"Message Id: {message_body['id']}")
         # Decode the base64-encoded image data
         decoded_data = base64.b64decode(image_data)
 
@@ -65,6 +64,6 @@ while True:
             ReceiptHandle=receipt_handle
         )
     else:
-        logger.info("No messages in queue")
+        logging.info("No messages in queue")
 #img = Image.open(urlopen(url))
 
