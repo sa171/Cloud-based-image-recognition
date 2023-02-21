@@ -36,7 +36,6 @@ def upload():
         response = sqsClient.send_message(
             QueueUrl= queueUrl,
             MessageBody= json.dumps(message),
-            WaitTimeSeconds=20
         )
         app.logger.info(response)
         app.logger.info("Image sent to SQS successfully.")
