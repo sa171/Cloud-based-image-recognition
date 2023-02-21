@@ -42,7 +42,7 @@ while True:
         message_body = json.loads(message['Body'])
         image_data = message_body['image']
         # Logging ID for tracing
-        logging.debug(f"Message Id: {message_body['id']}")
+        logging.debug(f"Processing message Id: {message_body['id']}")
         # Decode the base64-encoded image data
         decoded_data = base64.b64decode(image_data)
 
@@ -63,10 +63,18 @@ while True:
         save_name = f"{img_name},{result}"
         print(f"{save_name}")
         logging.info("Classification result of {} is {}".format(message_body['id'],result))
-
+        # storing output in output bucket
+        input_bucket_name = 'output-bucket-results231'
+        s3 = boto3.client('s3', region_name='us-east-1')
+        s3.put_object(
+            Bucket=input_bucket_name,
+            Key=id,
+            Body=result
+        )
+        logging.info("Image sent to Output Bucket successfully.")
         # Send classified image results to SQS Response Queue
         message_response = {
-            'id':str(uuid.uuid4()),
+            'id':message_body['id'],
             'results':result
         }
         response = sqs.send_message(
