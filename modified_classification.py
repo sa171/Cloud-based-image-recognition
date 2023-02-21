@@ -16,6 +16,7 @@ import sys
 import time
 import boto3
 import uuid
+import time
 
 sqs = boto3.client('sqs')
 
@@ -63,30 +64,27 @@ while True:
         print(f"{save_name}")
         logging.info("Classification result of {} is {}".format(message_body['id'],result))
 
-
         # Send classified image results to SQS Response Queue
         message_response = {
             'id':str(uuid.uuid4()),
             'results':result
         }
-        response = sqsClient.send_message(
+        response = sqs.send_message(
             QueueUrl= response_queue_url,
             MessageBody= json.dumps(message_response)
         )
 
-
-        # TODO:Upload Image to S3 input bucket - Use id by message_body['id'] and img
-
-        # TODO: Upload result to output bucket - Use result and id by message_body['id']
-
-
         # Delete the message from the queue
+        logging.info("Deleting message from response queue")
         receipt_handle = message['ReceiptHandle']
         sqs.delete_message(
             QueueUrl=queue_url,
             ReceiptHandle=receipt_handle
         )
-
+        # Introduce a delay
+        logging.info("Sleeping for 5 sec")
+        time.sleep(5)
+        logging.info("Awake!")
     else:
         logging.info("No messages in queue")
 #img = Image.open(urlopen(url))
