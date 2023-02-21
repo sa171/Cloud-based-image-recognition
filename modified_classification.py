@@ -15,6 +15,7 @@ import json
 import sys
 import time
 import boto3
+import uuid
 
 sqs = boto3.client('sqs')
 
@@ -23,6 +24,10 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
 file_handler.setFormatter(formatter)
 logging.basicConfig(filename='classification.log', level=logging.DEBUG)
 queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/request_queue'
+
+# test_request_queue = 'https://sqs.us-east-1.amazonaws.com/874290406143/p1-test2-sqs1'
+response_queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/response-queue'
+
 
 while True:
     response = sqs.receive_message(
@@ -57,15 +62,30 @@ while True:
         save_name = f"{img_name},{result}"
         print(f"{save_name}")
         logging.info("Classification result of {} is {}".format(message_body['id'],result))
+
+
+        # Send classified image results to SQS Response Queue
+        message_response = {
+            'id':str(uuid.uuid4()),
+            'results':result
+        }
+        response = sqsClient.send_message(
+            QueueUrl= response_queue_url,
+            MessageBody= json.dumps(message_response)
+        )
+
+
+        # TODO:Upload Image to S3 input bucket - Use id by message_body['id'] and img
+
+        # TODO: Upload result to output bucket - Use result and id by message_body['id']
+
+
         # Delete the message from the queue
         receipt_handle = message['ReceiptHandle']
         sqs.delete_message(
             QueueUrl=queue_url,
             ReceiptHandle=receipt_handle
         )
-        # TODO:Upload Image to S3 input bucket - Use id by message_body['id'] and img
-
-        # TODO: Upload result to output bucket - Use result and id by message_body['id']
 
     else:
         logging.info("No messages in queue")
