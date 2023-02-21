@@ -1,11 +1,21 @@
+set environment variables:
+export AWS_ACCESS_KEY_ID=AKIA4XD6E4L77UWI6O7H
+export AWS_SECRET_ACCESS_KEY=abcd
+export AWS_DEFAULT_REGION=us-east-1
+
 Connect to EC2 WebTier
 ssh -i "EC2_pair.pem" ec2-user@ec2-54-83-163-117.compute-1.amazonaws.com
 For App Tier:
-ssh -i "CSE546_Project1.pem" root@ec2-34-204-81-184.compute-1.amazonaws.com
+ssh -i "CSE546_Project1.pem" ubuntu@ec2-34-204-81-184.compute-1.amazonaws.com
 
 Activate virtual env
 source venv/bin/activate
 
 File transfer
-scp -i CSE546_Project1.pem E:\Courses\CC\Projects\WebTier\modified_classification.py ubuntu@ec2-34-204-81-184.compute-1.amazonaws.com:/home/ubuntu/modified_classification.py 
+scp -i CSE546_Project1.pem E:\Courses\CC\Projects\WebTier\modified_classification.py ubuntu@ec2-34-204-81-184.compute-1.amazonaws.com:/home/ubuntu/ 
+
+
+----
+scp -i EC2_pair.pem E:\Courses\CC\Projects\WebTier\app.py ec2-user@ec2-54-83-163-117.compute-1.amazonaws.com:/home/ec2-user/WebTier 
+scp -i CSE546_Project1.pem E:\Courses\CC\Projects\imagenet-100-updated\imagenet-100\test_0.JPEG ubuntu@ec2-34-204-81-184.compute-1.amazonaws.com:/home/ubuntu/
 
