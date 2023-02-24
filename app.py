@@ -20,6 +20,12 @@ def upload():
     #     return jsonify({'message': 'Bad Request'}), 400
     try:
         file = request.files['myfile']
+        id = str(uuid.uuid4())
+        image_name = './'+id+'_input_image.jpeg'
+        with open(image_name, 'wb') as f:
+            f.write(file.read())
+            print('Image saved to file')
+
         sqsClient = boto3.client('sqs',region_name="us-east-1")
         # queue = sqsClient.get_queue_url(QueueName='request_queue')
         queueUrl = "https://sqs.us-east-1.amazonaws.com/874290406143/request_queue"
@@ -28,7 +34,7 @@ def upload():
         #     sqs.create_queue(QueueName="request_queue")
         # app.logger.info("Received SQS queue url:",queue['QueueUrl'])
         # queueUrl = queue['QueueUrl']
-        id = str(uuid.uuid4())
+
         message = {
             'id':id,
             'image':base64.b64encode(file.read()).decode("utf-8")
@@ -41,11 +47,11 @@ def upload():
         app.logger.info("Image sent to SQS successfully.")
         input_bucket_name = 'input-bucket-1523'
         s3 = boto3.client('s3', region_name='us-east-1')
-        s3.put_object(
-            Bucket=input_bucket_name,
-            Key=id,
-            Body=file
-        )
+
+        with open(image_name, 'rb') as file:
+            s3.upload_fileobj(
+                file,input_bucket_name,id
+            )
         app.logger.info("Image sent to Input Bucket successfully.")
         while True:
             response = sqsClient.receive_message(
