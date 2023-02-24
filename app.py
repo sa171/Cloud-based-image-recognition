@@ -19,13 +19,14 @@ def upload():
     # if 'myfile' not in request.json:
     #     return jsonify({'message': 'Bad Request'}), 400
     try:
+        my_set = {}
         file = request.files['myfile']
         id = str(uuid.uuid4())
+        my_set.add(id)
         image_name = './'+id+'_input_image.jpeg'
         with open(image_name, 'wb') as f:
             f.write(file.read())
             print('Image saved to file')
-
         sqsClient = boto3.client('sqs',region_name="us-east-1")
         # queue = sqsClient.get_queue_url(QueueName='request_queue')
         queueUrl = "https://sqs.us-east-1.amazonaws.com/874290406143/request_queue"
@@ -62,8 +63,8 @@ def upload():
             if 'Messages' in response:
                 for message in response['Messages']:
                     message_body = json.loads(message['Body'])
-                    if message_body['id'] == id:
-                        app.logger.info("Image Id matched, result is {}".format(message_body['results']))
+                    if message_body['id'] in my_set:
+                        app.logger.info("Image {} matched, result is {}".format(message_body['id'],message_body['results']))
                         sqsClient.delete_message(
                             QueueUrl=response_queue_url,
                             ReceiptHandle=message['ReceiptHandle']
