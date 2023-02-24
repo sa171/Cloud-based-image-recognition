@@ -18,12 +18,12 @@ import boto3
 import uuid
 import time
 
-sqs = boto3.client('sqs')
+sqs = boto3.client('sqs',region_name="us-east-1")
 
-file_handler = logging.FileHandler('classification.log')
+file_handler = logging.FileHandler('/home/ubuntu/classification.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
 file_handler.setFormatter(formatter)
-logging.basicConfig(filename='classification.log', level=logging.DEBUG)
+logging.basicConfig(filename='/home/ubuntu/classification.log', level=logging.DEBUG)
 queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/request_queue'
 
 # test_request_queue = 'https://sqs.us-east-1.amazonaws.com/874290406143/p1-test2-sqs1'
@@ -89,9 +89,10 @@ try:
                 QueueUrl=queue_url,
                 ReceiptHandle=receipt_handle
             )
+            print("Successfully processed id {}".format(message_body['id']))
             # Introduce a delay
             logging.info("Sleeping for 5 sec")
-            time.sleep(5)
+            time.sleep(90)
             logging.info("Awake!")
         else:
             logging.info("No messages in queue")
