@@ -20,12 +20,13 @@ def upload():
     try:
         my_set = set()
         file = request.files['myfile']
+        filename = file.filename
         id = str(uuid.uuid4())
         my_set.add(id)
         image_name = './'+id+'_input_image.jpeg'
         with open(image_name, 'wb') as f:
             f.write(file.read())
-            print('{} image saved to file'.format(file.filename))
+            print('{} image saved to file'.format(filename))
         sqsClient = boto3.client('sqs',region_name="us-east-1")
         # queue = sqsClient.get_queue_url(QueueName='request_queue')
         queueUrl = "https://sqs.us-east-1.amazonaws.com/874290406143/request_queue"
@@ -36,7 +37,7 @@ def upload():
         # queueUrl = queue['QueueUrl']
         with open(image_name, 'rb') as f:
             image_data = f.read()
-            print('{} image loaded'.format(file.filename))
+            print('{} image loaded'.format(filename))
         encoded_image = base64.b64encode(image_data).decode("utf-8")
         message = {
             'id':id,
@@ -71,7 +72,7 @@ def upload():
                             QueueUrl=response_queue_url,
                             ReceiptHandle=message['ReceiptHandle']
                         )
-                        print('Result for {} is {}'.format(file.filename,message_body['results']))
+                        print('Result for {} is {}'.format(filename,message_body['results']))
                         return jsonify({'result': message_body['results']}), 200
 
         # Receive logic - Check all messages from receive queue and delete the one that matches the ID
