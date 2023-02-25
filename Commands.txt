@@ -19,3 +19,10 @@ scp -i CSE546_Project1.pem E:\Courses\CC\Projects\WebTier\modified_classificatio
 scp -i EC2_pair.pem E:\Courses\CC\Projects\WebTier\app.py ec2-user@ec2-54-83-163-117.compute-1.amazonaws.com:/home/ec2-user/WebTier 
 scp -i CSE546_Project1.pem E:\Courses\CC\Projects\imagenet-100-updated\imagenet-100\test_0.JPEG ubuntu@ec2-34-204-81-184.compute-1.amazonaws.com:/home/ubuntu/
 
+
+------------
+
+Mukul
+
+Fetch WebTier logs:
+scp -i /home/mukuflash/Documents/VS_Code/AWS/Credentials/EC2_pair.pem ec2-user@ec2-54-83-163-117.compute-1.amazonaws.com:/home/ec2-user/WebTier/flask.log .
