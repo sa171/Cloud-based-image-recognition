@@ -18,10 +18,12 @@ def index():
 def upload():
     try:
         # my_set = set()
+        my_map = dict()
         file = request.files['myfile']
         filename = file.filename
         id = str(uuid.uuid4())
         # my_set.add(id)
+        my_map[id] = filename
         image_name = './'+id+'_input_image.jpeg'
         with open(image_name, 'wb') as f:
             f.write(file.read())
@@ -51,7 +53,8 @@ def upload():
             s3.upload_fileobj(
                 file,input_bucket_name,id
             )
-        app.logger.info("Image sent to Input Bucket successfully.")
+        app.logger.info("Image {} sent to Input Bucket successfully.".format(filename))
+        print("Image {} sent to Input Bucket successfully.".format(filename))
         while True:
             response = sqsClient.receive_message(
                 QueueUrl=response_queue_url,
@@ -63,12 +66,12 @@ def upload():
         for message in response['Messages']:
             message_body = json.loads(message['Body'])
             # if message_body['id'] in my_set:
-            app.logger.info("Image {} matched, result is {}".format(message_body['id'],message_body['results']))
+            app.logger.info("Image {} result is {}".format(message_body['id'],message_body['results']))
             sqsClient.delete_message(
                 QueueUrl=response_queue_url,
                 ReceiptHandle=message['ReceiptHandle']
             )
-            print('Result for {} is {}'.format(filename,message_body['results']))
+            print('Result for {} is {}'.format(my_map[message_body['id']],message_body['results']))
         return jsonify({'result': message_body['results']}), 200
 
     # Receive logic - Check all messages from receive queue and delete the one that matches the ID
