@@ -34,7 +34,7 @@ try:
         response = sqs.receive_message(
             QueueUrl=queue_url,
             MaxNumberOfMessages=1,
-            WaitTimeSeconds=20
+            WaitTimeSeconds=10
         )
         if 'Messages' in response:
             message = response['Messages'][0]
@@ -55,7 +55,7 @@ try:
             outputs = model(img_tensor)
             _, predicted = torch.max(outputs.data, 1)
 
-            with open('./imagenet-labels.json') as f:
+            with open('/home/ubuntu/imagenet-labels.json') as f:
                 labels = json.load(f)
             result = labels[np.array(predicted)[0]]
             img_name = "received_image"
@@ -92,7 +92,7 @@ try:
             print("Successfully processed id {}".format(message_body['id']))
             # Introduce a delay
             logging.info("Sleeping for 5 sec")
-            time.sleep(90)
+            time.sleep(60)
             logging.info("Awake!")
         else:
             logging.info("No messages in queue")

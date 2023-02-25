@@ -24,6 +24,7 @@ def upload():
         id = str(uuid.uuid4())
         # my_set.add(id)
         my_map[id] = filename
+        # print("Entry : {}".format(len(my_map)))
         image_name = './'+id+'_input_image.jpeg'
         with open(image_name, 'wb') as f:
             f.write(file.read())
@@ -34,7 +35,6 @@ def upload():
         with open(image_name, 'rb') as f:
             image_data = f.read()
             # print('{} image loaded'.format(filename))
-        os.remove(image_name)
         encoded_image = base64.b64encode(image_data).decode("utf-8")
         message = {
             'id':id,
@@ -55,24 +55,26 @@ def upload():
             )
         app.logger.info("Image {} sent to Input Bucket successfully.".format(filename))
         print("Image {} sent to Input Bucket successfully.".format(filename))
+        os.remove(image_name)
         while True:
             response = sqsClient.receive_message(
                 QueueUrl=response_queue_url,
-                MaxNumberOfMessages=1,
+                MaxNumberOfMessages=10,
                 WaitTimeSeconds=10,
+                VisibilityTimeout=2
             )
             if 'Messages' in response:
-                break
-        for message in response['Messages']:
-            message_body = json.loads(message['Body'])
-            # if message_body['id'] in my_set:
-            app.logger.info("Image {} result is {}".format(message_body['id'],message_body['results']))
-            sqsClient.delete_message(
-                QueueUrl=response_queue_url,
-                ReceiptHandle=message['ReceiptHandle']
-            )
-            print('Result for {} is {}'.format(my_map[message_body['id']],message_body['results']))
-        return jsonify({'result': message_body['results']}), 200
+                for message in response['Messages']:
+                    message_body = json.loads(message['Body'])
+                    if id == message_body['id']:
+                        app.logger.info("Image {} result is {}".format(my_map[message_body['id']], message_body['results']))
+                        sqsClient.delete_message(
+                            QueueUrl=response_queue_url,
+                            ReceiptHandle=message['ReceiptHandle']
+                        )
+                        print('Result for {} is {}'.format(my_map[message_body['id']], message_body['results']))
+                        return jsonify({'result': message_body['results'], 'id': message_body['id']}), 200
+        return jsonify({'message':'Classification result not available'}),200
 
     # Receive logic - Check all messages from receive queue and delete the one that matches the ID
         return jsonify({'message':'Classification result not available'}),200
