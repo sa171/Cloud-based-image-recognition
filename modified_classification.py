@@ -19,15 +19,16 @@ import uuid
 import time
 
 sqs = boto3.client('sqs',region_name="us-east-1")
+queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/request_queue'
+response_queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/response-queue'
+
+output_bucket_name = 'output-bucket-results231'
+s3 = boto3.client('s3', region_name='us-east-1')
 
 file_handler = logging.FileHandler('/home/ubuntu/classification.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
 file_handler.setFormatter(formatter)
 logging.basicConfig(filename='/home/ubuntu/classification.log', level=logging.DEBUG)
-queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/request_queue'
-
-# test_request_queue = 'https://sqs.us-east-1.amazonaws.com/874290406143/p1-test2-sqs1'
-response_queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/response-queue'
 
 try:
     while True:
@@ -41,8 +42,10 @@ try:
             logging.debug('Received message from SQS', message)
             message_body = json.loads(message['Body'])
             image_data = message_body['image']
+
             # Logging ID for tracing
             logging.debug(f"Processing message Id: {message_body['id']}")
+
             # Decode the base64-encoded image data
             decoded_data = base64.b64decode(image_data)
 
@@ -62,16 +65,20 @@ try:
             # save_name = f"({img_name}, {result})"
             # save_name = f"{img_name},{result}"
             # print(f"{save_name}")
+
             logging.info("Classification result of {} is {}".format(message_body['id'],result))
+
+            img_values = [message_body['id'],result]
+            bucket_value = ','.join(img_values)
+            
             # storing output in output bucket
-            output_bucket_name = 'output-bucket-results231'
-            s3 = boto3.client('s3', region_name='us-east-1')
             s3.put_object(
                 Bucket=output_bucket_name,
                 Key=message_body['id'],
-                Body=result
+                Body=bucket_value
             )
             logging.info("Image sent to Output Bucket successfully.")
+
             # Send classified image results to SQS Response Queue
             message_response = {
                 'id':message_body['id'],
@@ -90,6 +97,7 @@ try:
                 ReceiptHandle=receipt_handle
             )
             print("Successfully processed id {}".format(message_body['id']))
+
             # Introduce a delay
             logging.info("Sleeping for 10 sec")
             time.sleep(10)
