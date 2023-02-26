@@ -21,7 +21,7 @@ def upload():
         # my_map = dict()
         file = request.files['myfile']
         filename = file.filename.split('.')[0]
-        id = str(uuid.uuid4())+'_'+filename
+        id = str(uuid.uuid4())+','+filename
         # my_set.add(id)
         # my_map[id] = filename
         # print("Entry : {}".format(len(my_map)))
@@ -72,8 +72,8 @@ def upload():
                         QueueUrl=response_queue_url,
                         ReceiptHandle=message['ReceiptHandle']
                     )
-                    print('Result for {} is {}'.format(message_body['id'], message_body['results']))
-                    return jsonify({'result': message_body['results'], 'id': message_body['id']}), 200
+                    print('Result for {} is {}'.format(message_body['id'].split(',')[1], message_body['results']))
+                    return jsonify({'result': message_body['results'], 'id': message_body['id'].split(',')[1]}), 200
         return jsonify({'message':'Classification result not available'}),200
 
     # Receive logic - Check all messages from receive queue and delete the one that matches the ID

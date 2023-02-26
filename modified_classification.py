@@ -91,8 +91,8 @@ try:
             )
             print("Successfully processed id {}".format(message_body['id']))
             # Introduce a delay
-            logging.info("Sleeping for 5 sec")
-            time.sleep(60)
+            logging.info("Sleeping for 10 sec")
+            time.sleep(10)
             logging.info("Awake!")
         else:
             logging.info("No messages in queue")
