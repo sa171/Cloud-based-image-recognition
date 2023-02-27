@@ -18,6 +18,7 @@ import boto3
 import uuid
 import time
 
+# define client for sqs and s3
 sqs = boto3.client('sqs',region_name="us-east-1")
 queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/request_queue'
 response_queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/response-queue'
@@ -25,6 +26,7 @@ response_queue_url = 'https://sqs.us-east-1.amazonaws.com/874290406143/response-
 output_bucket_name = 'output-bucket-results231'
 s3 = boto3.client('s3', region_name='us-east-1')
 
+# define file handler for capturing logs
 file_handler = logging.FileHandler('/home/ubuntu/classification.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
 file_handler.setFormatter(formatter)
@@ -32,6 +34,7 @@ logging.basicConfig(filename='/home/ubuntu/classification.log', level=logging.DE
 
 try:
     while True:
+        #long polling for messages in request queue
         response = sqs.receive_message(
             QueueUrl=queue_url,
             MaxNumberOfMessages=1,
@@ -62,15 +65,9 @@ try:
                 labels = json.load(f)
             result = labels[np.array(predicted)[0]]
             img_name = "received_image"
-            # save_name = f"({img_name}, {result})"
-            # save_name = f"{img_name},{result}"
-            # print(f"{save_name}")
-
             logging.info("Classification result of {} is {}".format(message_body['id'],result))
-
             img_values = [message_body['id'],result]
             bucket_value = ','.join(img_values)
-            
             # storing output in output bucket
             s3.put_object(
                 Bucket=output_bucket_name,
@@ -78,7 +75,6 @@ try:
                 Body=bucket_value
             )
             logging.info("Image sent to Output Bucket successfully.")
-
             # Send classified image results to SQS Response Queue
             message_response = {
                 'id':message_body['id'],
