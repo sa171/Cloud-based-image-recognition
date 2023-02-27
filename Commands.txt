@@ -32,8 +32,12 @@ Mukul
 
 Fetch WebTier logs:
 scp -i /home/mukuflash/Documents/VS_Code/AWS/Credentials/EC2_pair.pem ec2-user@ec2-54-83-163-117.compute-1.amazonaws.com:/home/ec2-user/WebTier/flask.log .
-scp -i CSE546_Project1.pem ubuntu@ec2-34-204-81-184.compute-1.amazonaws.com:/home/ubuntu/modified_classification.py E:\Courses\CC\Projects\WebTier\modified_classification.py 
+scp -i /home/mukuflash/Documents/VS_Code/AWS/Credentials/CSE546_Project1.pem ubuntu@ec2-34-204-81-184.compute-1.amazonaws.com:/home/ubuntu/modified_classification.py E:\Courses\CC\Projects\WebTier\modified_classification.py 
 
+scp -i /home/mukuflash/Documents/VS_Code/AWS/Credentials/CSE546_Project1.pem /home/mukuflash/Documents/VS_Code/AWS/AppTier/WebTier/modified_classification.py ubuntu@ec2-34-204-81-184.compute-1.amazonaws.com:/home/ubuntu/ 
+
+
+python3 workload/multithread_workload_generator.py --image_folder images --url http://54.83.163.117:5000/upload --num_request 100
 
 
 ******* systemd config **********
